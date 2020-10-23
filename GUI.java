@@ -31,6 +31,7 @@ public class GUI extends JFrame {
     JMenuItem minus;
     JMenuItem mal;
     JMenuItem geteilt;
+    JMenuItem gemischt;
     JMenuItem einhundert;
     JMenuItem zweihundert;
     JMenuItem fuenfhundert;
@@ -45,7 +46,7 @@ public class GUI extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         super.setTitle("KRECHNEN");
-        setResizable(false);
+        setResizable(true);
         setLayout(null);
 
         createTitlePage();
@@ -60,7 +61,7 @@ public class GUI extends JFrame {
 
         title = new JLabel("KRECHNEN");
         title.setFont(new Font("Arial Black", Font.BOLD, 100));
-        title.setBounds((int) screensize.width / 2 - 300, (int) screensize.height / 2 - 100, 700, 100);
+        title.setBounds(screensize.width / 2 - 300, screensize.height / 2 - 100, 700, 100);
 
         MenuBarHandler mbl = new MenuBarHandler();
 
@@ -73,6 +74,7 @@ public class GUI extends JFrame {
         minus = new JMenuItem("-");
         mal = new JMenuItem("*");
         geteilt = new JMenuItem("/");
+        gemischt = new JMenuItem("gemischt");
         einhundert = new JMenuItem("0 - 100");
         zweihundert = new JMenuItem("0 - 200");
         fuenfhundert = new JMenuItem("0 - 500");
@@ -83,6 +85,7 @@ public class GUI extends JFrame {
         minus.addActionListener(mbl);
         mal.addActionListener(mbl);
         geteilt.addActionListener(mbl);
+        gemischt.addActionListener(mbl);
         einhundert.addActionListener(mbl);
         zweihundert.addActionListener(mbl);
         fuenfhundert.addActionListener(mbl);
@@ -93,6 +96,7 @@ public class GUI extends JFrame {
         rechenart.add(minus);
         rechenart.add(mal);
         rechenart.add(geteilt);
+        rechenart.add(gemischt);
         zahlenbereich.add(einhundert);
         zahlenbereich.add(zweihundert);
         zahlenbereich.add(fuenfhundert);
@@ -120,7 +124,7 @@ public class GUI extends JFrame {
 
             task = new JTextArea("", 1, 10);
             task.setFont(new Font("Serif", Font.PLAIN, 30));
-            task.setBounds((int) screensize.width / 2 - 100, (int) screensize.height / 2 - 15, 200, 35);
+            task.setBounds(screensize.width / 2 - 100, screensize.height / 2 - 15, 200, 35);
             task.setOpaque(false);
 
             input = new JTextField();
@@ -143,46 +147,91 @@ public class GUI extends JFrame {
 
     private void createTasks(){
         String[] zwischenspeicher;
-        int a;
-        int b;
-        int conclusion;
+        String rechner = "";
+        int gconclusion = 0;
+        Random x = new Random();
+        int a = 0;
+        int b = 0;
+        int conclusion = 0;
+        ArrayList<Integer> teiler;
         for(int i = 0; i < 10; i++) {
             switch (calculationType) {
-                case "+":
+                case "+" -> {
                     a = x.nextInt(numberRange + 1);
                     b = x.nextInt((numberRange - a) + 1);
                     conclusion = a + b;
-                    break;
-                case "-":
+                }
+                case "-" -> {
                     a = x.nextInt(numberRange + 1);
                     b = x.nextInt(a + 1);
                     conclusion = a - b;
-                case "*":
+                }
+                case "*" -> {
                     a = x.nextInt(((int) Math.sqrt(numberRange)) + 1);
                     b = x.nextInt(((int) Math.sqrt(numberRange)) + 1);
                     conclusion = a * b;
-                case "/":
+                }
+                case "/" -> {
                     a = x.nextInt(numberRange + 1);
-                    ArrayList<Integer> teiler = teiler(a);
+                    teiler = teiler(a);
                     b = teiler.get(x.nextInt(teiler.size()));
-                    conclusion = (int) a / b;
-                default:
+                    conclusion = a / b;
+                }
+                case "gemischt" -> {
+                    int rechnen = x.nextInt(4);
+                    switch (rechnen) {
+                        case 0 -> {
+                            a = x.nextInt(numberRange + 1);
+                            b = x.nextInt((numberRange - a) + 1);
+                            gconclusion = a + b;
+                            rechner = "+";
+                        }
+                        case 1 -> {
+                            a = x.nextInt(numberRange + 1);
+                            b = x.nextInt(a + 1);
+                            gconclusion = a - b;
+                            rechner = "-";
+                        }
+                        case 2 -> {
+                            a = x.nextInt(((int) Math.sqrt(numberRange)) + 1);
+                            b = x.nextInt(((int) Math.sqrt(numberRange)) + 1);
+                            gconclusion = a * b;
+                            rechner = "*";
+                        }
+                        case 3 -> {
+                            a = x.nextInt(numberRange + 1);
+                            teiler = teiler(a);
+                            b = teiler.get(x.nextInt(teiler.size()));
+                            gconclusion = (int) a / b;
+                            rechner = "/";
+                        }
+                    }
+                }
+                default -> {
                     a = 0;
                     b = 0;
                     conclusion = 0;
+                }
             }
-            zwischenspeicher = new String[]{
-                    a + " " + calculationType + " " + b + " = ",
-                    Integer.toString(conclusion)
-            };
+            if(calculationType.equals("gemischt")){
+                zwischenspeicher = new String[]{
+                        a + " " + rechner + " " + b + " = ",
+                        Integer.toString(gconclusion)
+                };
+            }else {
+                zwischenspeicher = new String[]{
+                        a + " " + calculationType + " " + b + " = ",
+                        Integer.toString(conclusion)
+                };
+            }
             tasks.add(zwischenspeicher);
         }
     }
 
     private static ArrayList<Integer> teiler(int n){
         ArrayList<Integer> teiler = new ArrayList<>();
-        for (int i = 0; i <= n; i++) {
-            if(i % n == 0){
+        for (int i = 1; i <= n; i++) {
+            if(n % i == 0){
                 teiler.add(i);
             }
         }
@@ -200,6 +249,8 @@ public class GUI extends JFrame {
                 calculationType = "*";
             }else if(event.getSource() == geteilt){
                 calculationType = "/";
+            }else if(event.getSource() == gemischt){
+                calculationType = "gemischt";
             }else if(event.getSource() == einhundert){
                 if(calculationType.isEmpty()){
                     JOptionPane.showConfirmDialog(null, "Du hast keine Rechenart gewählt!",
@@ -271,6 +322,7 @@ public class GUI extends JFrame {
                     remove(taskPage);
                     validate();
                     tasks.clear();
+                    aufruf = 1;
                     createTitlePage();
                 }
             }
